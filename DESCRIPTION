@@ -4,9 +4,9 @@ Version: 0.0.0.9000
 Authors@R: 
   c(person("Verónica", "Cruz-Alonso", , "veronica.cral@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0642-036X")),
-    person("Julen", "Astigarraga", , , role = c("aut", "cre"),
+    person("Julen", "Astigarraga", , , role = c("aut"),
            comment = c(ORCID = "0000-0001-9520-3713")),
-    person("Francisco", "Rodriguez-Sanchez", , "f.rodriguez.sanc@gmail.com", role = c("aut", "cre"),
+    person("Francisco", "Rodriguez-Sanchez", , "f.rodriguez.sanc@gmail.com", role = c("aut"),
            comment = c(ORCID = "0000-0002-7981-1599"))
   )
 Description: What the package does (one paragraph).
