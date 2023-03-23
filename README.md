@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# templateRpackage
+# resilience
 
 <!-- badges: start -->
 
@@ -13,9 +13,10 @@ coverage](https://codecov.io/gh/EcologyR/templateRpackage/branch/master/graph/ba
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 <!-- [![CodeFactor](https://www.codefactor.io/repository/github/ecologyr/templaterpackage/badge)](https://www.codefactor.io/repository/github/ecologyr/templaterpackage) -->
+
 <!-- badges: end -->
 
-The goal of templateRpackage is to …
+The goal of resilience is to calculate resilience indices
 
 ## Installation
 
@@ -70,21 +71,7 @@ files, so they display on GitHub and CRAN.
 If using this package, please cite it:
 
 ``` r
-citation("templateRpackage")
-
-To cite templateRpackage in publications use:
-
-  Rodriguez-Sanchez F. 2023. templateRpackage.
-  https://ecologyr.github.io/templateRpackage/
-
-A BibTeX entry for LaTeX users is
-
-  @Manual{,
-    title = {templateRpackage},
-    author = {Francisco Rodriguez-Sanchez},
-    year = {2023},
-    url = {https://ecologyr.github.io/templateRpackage/},
-  }
+#citation("resilience")
 ```
 
 ## Funding
