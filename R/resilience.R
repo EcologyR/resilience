@@ -40,43 +40,57 @@ resindex <- function(data, event, ntemp, index) {
 
   ##
 
-  l <- do.call(sapply(data, subset_res, event), c)
+  l <- vector("list", length = length(event))
 
-  if ("resilience" %in% index) {
-    out <- do.call(lapply(l, resil), rbind)
-    out$event <- event
-  } if ("resistance" %in% index) {
-      out2 <- do.call(lapply(l, resist), rbind)
-      out2$event <- event
-  } if ("recovery" %in% index) {
-      out3 <- do.call(lapply(l, recov), rbind)
-      out3$event <- event
+  for (i in 1:length(event)) {
+    l[[i]] <- data[data$temp > (event[i] - ntemp - 1) &
+                     data$temp < (event[i] + ntemp + 1), ]
   }
 
-  return(list(resilience = out, resistance = out2, recovery = out3))
+
+  if ("resilience" %in% index) {
+    out_resil <- data.frame(resilience = do.call(rbind, lapply(l, resil)))
+    out_resil$event <- event
+  } else { out_resil <- NULL }
+
+  if ("resistance" %in% index) {
+      out_resis <- data.frame(resistance = do.call(rbind, lapply(l, resist)))
+      out_resis$event <- event
+  } else { out_resis <- NULL }
+
+  if ("recovery" %in% index) {
+      out_recov <- data.frame(recovery = do.call(rbind, lapply(l, recov)))
+      out_recov$event <- event
+  } else { out_recov <- NULL }
+
+  out_l <- list(out_resil, out_resis, out_recov)
+  out <- data.frame(event=event)
+
+  for (i in 1:3) {
+    if (is.null(out_l[[i]])) next
+    out <- merge(out, out_l[[i]])
+  }
+
+  return(out)
 
 }
 
 
-select_res <-  subset(data,
-                      data$temp > (event-ntemp-1) &
-                        data$temp < (event+ntemp+1))
-
 #resilience
 resil <- function (x) {
-  mid <- round(nrow(x)) + 1
+  mid <- round(nrow(x)/2) + 1
   return(sum(x[1:(mid-1),"performance"])/sum(x[1:(mid+1),"performance"]))
 }
 
 #resistance
 resist <- function (x) {
-  mid <- round(nrow(x)) + 1
+  mid <- round(nrow(x)/2) + 1
   return(x[mid,"performance"]/sum(x[1:(mid-1),"performance"]))
 }
 
 #recovery
 recov <- function (x) {
-  mid <- round(nrow(x)) + 1
-  return(sum(x[1:(mid+1),"performance"])/sum(x[event,"performance"]))
+  mid <- round(nrow(x)/2) + 1
+  return(sum(x[1:(mid+1),"performance"])/sum(x[mid,"performance"]))
 }
 
