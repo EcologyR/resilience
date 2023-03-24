@@ -87,7 +87,7 @@ resindex <- function(data, event, ntemp, index) {
 #resilience
 resil <- function (x) {
   mid <- round(nrow(x)/2) + 1
-  return(sum(x[1:(mid-1),"performance"])/sum(x[1:(mid+1),"performance"]))
+  return(sum(x[1:(mid-1),"performance"])/sum(x[(mid+1):nrow(x),"performance"]))
 }
 
 #resistance
@@ -99,6 +99,6 @@ resist <- function (x) {
 #recovery
 recov <- function (x) {
   mid <- round(nrow(x)/2) + 1
-  return(sum(x[1:(mid+1),"performance"])/sum(x[mid,"performance"]))
+  return(sum(x[(mid+1):nrow(x),"performance"])/sum(x[mid,"performance"]))
 }
 

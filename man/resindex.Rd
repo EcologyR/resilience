@@ -22,3 +22,13 @@ A \link{data.frame}
 \description{
 Resilience indices
 }
+\examples{
+data(exampledata)
+for (i in 1:length(unique(exampledata$ID))) {
+item <- exampledata[exampledata$ID == unique(exampledata$ID)[i], ]
+print(resindex(data = item,
+         event = c(1990, 2000),
+         ntemp = 3,
+        index = c("resilience", "recovery", "resistance")))
+}
+}
