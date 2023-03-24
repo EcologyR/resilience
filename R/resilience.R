@@ -11,6 +11,11 @@
 #' @export
 #'
 #' @examples
+#' data(exampledata)
+#' for (i in 1:length(unique(exampledata$ID))) {
+#'item <- exampledata[exampledata$ID == unique(exampledata$ID)[i]]
+#'resindex(data = item, event = c(1990, 2000), ntemp = 3, index = c("resilience", "recovery", "resistance))
+#' }
 
 resindex <- function(data, event, ntemp, index) {
 
@@ -44,7 +49,7 @@ resindex <- function(data, event, ntemp, index) {
 
   for (i in 1:length(event)) {
     l[[i]] <- data[data$temp > (event[i] - ntemp - 1) &
-                     data$temp < (event[i] + ntemp + 1), ]
+                     data$temp < (event[i] + ntemp + 1),]
   }
 
 
