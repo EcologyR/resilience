@@ -13,8 +13,11 @@
 #' @examples
 #' data(exampledata)
 #' for (i in 1:length(unique(exampledata$ID))) {
-#'item <- exampledata[exampledata$ID == unique(exampledata$ID)[i]]
-#'resindex(data = item, event = c(1990, 2000), ntemp = 3, index = c("resilience", "recovery", "resistance))
+#' item <- exampledata[exampledata$ID == unique(exampledata$ID)[i], ]
+#' print(resindex(data = item,
+#'          event = c(1990, 2000),
+#'          ntemp = 3,
+#'         index = c("resilience", "recovery", "resistance")))
 #' }
 
 resindex <- function(data, event, ntemp, index) {
@@ -26,7 +29,7 @@ resindex <- function(data, event, ntemp, index) {
     stop("data must be either a matrix or a data.frame")
 
   if (!inherits(data, "matrix")) {
-    stopifnot(ncol(data) == 2)
+    stopifnot(ncol(data) == 3)
   }
 
   stopifnot("temp" %in% names(data))
@@ -40,7 +43,7 @@ resindex <- function(data, event, ntemp, index) {
   stopifnot(event >= 1)
 
   #index
-  if (!index %in% c("resilience", "resistance", "recovery"))
+  if (any(!index %in% c("resilience", "resistance", "recovery")))
     stop("index must be one of 'resilience', 'resistance' or 'recovery'")
 
   ##
