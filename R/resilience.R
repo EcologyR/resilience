@@ -3,7 +3,7 @@
 #'
 #' @param data A [matrix] or [data.frame] with two columns temp (Date) and performance (Numeric)
 #' @param event Date. Vector of dates of the disturbance events
-#' @param ntemp Double. Number of temporal steps to include in the calculations
+#' @param lag Vector. Number of temporal steps to include in the calculations, pre and post disturbance
 #' @param index Character. Indices to be calculated ('resilience', 'resistance' or 'recovery').
 #' Various elements can be concatenated in the vector.
 #'
@@ -20,7 +20,7 @@
 #'         index = c("resilience", "recovery", "resistance")))
 #' }
 
-resindex <- function(data, event, ntemp, index) {
+resindex <- function(data, event, lag, index) {
 
   ##Check arguments
 
@@ -37,10 +37,11 @@ resindex <- function(data, event, ntemp, index) {
   stopifnot("performance" %in% names(data))
 
   #event
+  stopifnot(event >= 1)
   stopifnot(class(event[1]) != class(data$temp[1]))
 
-  #ntemp
-  stopifnot(event >= 1)
+  #lag
+  stopifnot(length(lag) == 2)
 
   #index
   if (any(!index %in% c("resilience", "resistance", "recovery")))
@@ -51,8 +52,8 @@ resindex <- function(data, event, ntemp, index) {
   l <- vector("list", length = length(event))
 
   for (i in 1:length(event)) {
-    l[[i]] <- data[data$temp > (event[i] - ntemp - 1) &
-                     data$temp < (event[i] + ntemp + 1),]
+    l[[i]] <- data[data$temp > (event[i] - lag[1] - 1) &
+                     data$temp < (event[i] + lag[2] + 1),]
   }
 
 
