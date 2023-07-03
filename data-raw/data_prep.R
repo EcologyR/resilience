@@ -1,7 +1,7 @@
 
 exampledata <- read.csv("data-raw/DendroData.csv")
-exampledata <- exampledata |>
-  select(ID, Year, BAI) |>
-  rename(temp = Year, performance = BAI)
+
+exampledata <- subset(exampledata, select = c("ID", "Year", "BAI"))
+colnames(exampledata) <- c("ID" ,"temp", "performance")
 
 usethis::use_data(exampledata, overwrite = TRUE)
