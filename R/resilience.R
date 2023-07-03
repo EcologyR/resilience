@@ -1,7 +1,10 @@
 
 #' Resilience indices
 #'
-#' @param data A [matrix] or [data.frame] with two columns temp (Date) and performance (Numeric)
+#' @param series A [matrix] or [data.frame] representing a temporal series, with two columns: the dates (Date) and the performance (Numeric).
+#' If `series` is a matrix, it must have only two columns: the first with dates and the second with performance data.
+#' If `series` is a data.frame, it must contain at least two columns named `temp` and `performance`
+#' with date and performance values, respectively.
 #' @param event Date. Vector of dates of the disturbance events
 #' @param lag Vector. Number of temporal steps to include in the calculations, pre and post disturbance
 #' @param index Character. Indices to be calculated ('resilience', 'resistance' or 'recovery').
@@ -11,69 +14,72 @@
 #' @export
 #'
 #' @examples
-#' data(exampledata)
-#' for (i in 1:length(unique(exampledata$ID))) {
-#' item <- exampledata[exampledata$ID == unique(exampledata$ID)[i], ]
-#' print(resindex(data = item,
-#'          event = c(1990, 2000),
-#'          ntemp = 3,
-#'         index = c("resilience", "recovery", "resistance")))
-#' }
+# data(exampledata)
+# for (i in 1:length(unique(exampledata$ID))) {
+# item <- exampledata[exampledata$ID == unique(exampledata$ID)[i], ]
+# print(resindex(series = item,
+#          event = c(1990, 2000),
+#          lag = c(3, 3),
+#         index = c("resilience", "recovery", "resistance")))
+# }
 
-resindex <- function(data, event, lag, index) {
+resindex <- function(series, event, lag, index) {
+  ## Check arguments
 
-  ##Check arguments
-
-  #data
-  if (!inherits(data, c("matrix", "data.frame")))
-    stop("data must be either a matrix or a data.frame")
-
-  if (!inherits(data, "matrix")) {
-    stopifnot(ncol(data) == 3)
+  # series
+  if (!inherits(series, c("matrix", "data.frame"))) {
+    stop("series must be either a matrix or a data.frame")
   }
 
-  stopifnot("temp" %in% names(data))
+  if (!inherits(series, "matrix")) {
+    stopifnot(ncol(series) == 3)
+  }
 
-  stopifnot("performance" %in% names(data))
+  stopifnot("temp" %in% names(series))
 
-  #event
+  stopifnot("performance" %in% names(series))
+
+  # event
   stopifnot(event >= 1)
-  stopifnot(class(event[1]) != class(data$temp[1]))
+  stopifnot(class(event[1]) != class(series$temp[1]))
 
-  #lag
+  # lag
   stopifnot(length(lag) == 2)
 
-  #index
-  if (any(!index %in% c("resilience", "resistance", "recovery")))
+  # index
+  if (any(!index %in% c("resilience", "resistance", "recovery"))) {
     stop("index must be one of 'resilience', 'resistance' or 'recovery'")
+  }
 
   ##
 
-  l <- vector("list", length = length(event))
-
-  for (i in 1:length(event)) {
-    l[[i]] <- data[data$temp > (event[i] - lag[1] - 1) &
-                     data$temp < (event[i] + lag[2] + 1),]
-  }
+  list_of_periods <- lapply(event, splitting, series1 = series, lag1 = lag)
 
 
   if ("resilience" %in% index) {
-    out_resil <- data.frame(resilience = do.call(rbind, lapply(l, resil)))
-    out_resil$event <- event
-  } else { out_resil <- NULL }
+    out_resil <- data.frame(event = event)
+    out_resil$resilience <- do.call(rbind, lapply(list_of_periods, resil))
+  } else {
+    out_resil <- NULL
+  }
 
   if ("resistance" %in% index) {
-      out_resis <- data.frame(resistance = do.call(rbind, lapply(l, resist)))
-      out_resis$event <- event
-  } else { out_resis <- NULL }
+    out_resis <- data.frame(event = event)
+    out_resis$resistance <- do.call(rbind, lapply(list_of_periods, resist))
+
+  } else {
+    out_resis <- NULL
+  }
 
   if ("recovery" %in% index) {
-      out_recov <- data.frame(recovery = do.call(rbind, lapply(l, recov)))
-      out_recov$event <- event
-  } else { out_recov <- NULL }
+    out_recov <- data.frame(event = event)
+    out_recov$recovery <- do.call(rbind, lapply(list_of_periods, recov))
+  } else {
+    out_recov <- NULL
+  }
 
   out_l <- list(out_resil, out_resis, out_recov)
-  out <- data.frame(event=event)
+  out <- data.frame(event = event)
 
   for (i in 1:3) {
     if (is.null(out_l[[i]])) next
@@ -81,25 +87,39 @@ resindex <- function(data, event, lag, index) {
   }
 
   return(out)
+}
+
+
+# splitting temporal series
+
+splitting <- function (event1, series1, lag1) {
+
+  pre_period <- series1[series1$temp >= (event1 - lag1[1]) &
+                          series1$temp < event1, ]
+
+  disturb_period <- series1[series1$temp == event1, ]
+
+  pos_period <- series1[series1$temp > event1 &
+                           series1$temp <= (event1 + lag1[2]), ]
+
+  return(list("pre_period" = pre_period,
+              "disturb_period" = disturb_period,
+              "pos_period" = pos_period))
 
 }
 
 
-#resilience
-resil <- function (x) {
-  mid <- round(nrow(x)/2) + 1
-  return(sum(x[1:(mid-1),"performance"])/sum(x[(mid+1):nrow(x),"performance"]))
+# resilience
+resil <- function(x) {
+  return(mean(x$pos_period[, "performance"]) / mean(x$pre_period[, "performance"]))
 }
 
-#resistance
-resist <- function (x) {
-  mid <- round(nrow(x)/2) + 1
-  return(x[mid,"performance"]/sum(x[1:(mid-1),"performance"]))
+# resistance
+resist <- function(x) {
+  return(mean(x$disturb_period[, "performance"]) / mean(x$pre_period[, "performance"]))
 }
 
-#recovery
-recov <- function (x) {
-  mid <- round(nrow(x)/2) + 1
-  return(sum(x[(mid+1):nrow(x),"performance"])/sum(x[mid,"performance"]))
+# recovery
+recov <- function(x) {
+  return(mean(x$pos_period[, "performance"]) / mean(x$disturb_period[, "performance"]))
 }
-
