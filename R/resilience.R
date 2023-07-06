@@ -4,6 +4,7 @@
 #' If `series` is a matrix, it must have only two columns: the first with dates and the second with performance data.
 #' If `series` is a data.frame, it must contain at least two columns named `temp` and `performance`
 #' with date and performance values, respectively. temp must be in a format "YYYY-MM-DD", "YYYY-MM", "YYYY".
+#' Temp must be arranged from past to recent dates
 #' @param event Character. List of dates or periods of the disturbance events.
 #' @param lag Vector. Number of years, months or days to include in the calculations, pre and post disturbance
 #' @param index Character. Indices to be calculated ('resilience', 'resistance' or 'recovery').
