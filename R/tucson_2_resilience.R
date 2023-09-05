@@ -1,30 +1,27 @@
-# https://www.rdocumentation.org/packages/dplR/versions/1.7.3/topics/read.tucson
-library(dplR)
+load("data/exampledata.rda")
 
-file_tuc <- read.tucson("R/Yellowstone_PSME_format.txt")
+exampledata$year <- row.names(exampledata)
 
-file_tuc$year <- row.names(file_tuc)
-
-# pivot longer
-file_tuc_l <- reshape(
-  file_tuc,
-  varying = names(file_tuc)[-which(names(file_tuc) == "year")],
+# long format
+exampledata_l <- reshape(
+  exampledata,
+  varying = names(exampledata)[-which(names(exampledata) == "year")],
   v.names = "ring_width",
   timevar = "tree_id",
-  times = names(file_tuc)[-which(names(file_tuc) == "year")],
+  times = names(exampledata)[-which(names(exampledata) == "year")],
   direction = "long"
 )
 
 # arrange by tree_id
-file_tuc_l <- file_tuc_l[order(file_tuc_l$tree_id), ]
+exampledata_l <- exampledata_l[order(exampledata_l$tree_id), ]
 
 # clean
-rownames(file_tuc_l) <- NULL
+rownames(exampledata_l) <- NULL
 
-file_tuc_l$id <- NULL
+exampledata_l$id <- NULL
 
 # test
-tree_test <- subset(file_tuc_l, tree_id == "BTK05A")
+tree_test <- subset(exampledata_l, tree_id == "A-R-10a")
 
 identical(as.vector(tree_test[, "ring_width"]),
-          as.vector(file_tuc[, "BTK05A"]))
+          as.vector(exampledata[, "A-R-10a"]))
