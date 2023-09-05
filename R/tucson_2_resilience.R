@@ -1,27 +1,56 @@
-load("data/exampledata.rda")
+#' From Tucson to long format
+#'
+#' @param series a [data.frame] containing tree-ring ring widths in Tucson format with the series in columns and the years as rows. The series ids are the column names and the years are the row names.
+#'
+#' @return a [data.frame] in long format with three columns named `ID`, `temp` and `performance`, with ID, date, and performance values, respectively.
+#' @export
+#'
+#' @examples
+#' data(exampledata)
+#' tucson_2_resilience(series = exampledata)
 
-exampledata$year <- row.names(exampledata)
+tucson_2_resilience <- function(series) {
 
-# long format
-exampledata_l <- reshape(
-  exampledata,
-  varying = names(exampledata)[-which(names(exampledata) == "year")],
-  v.names = "ring_width",
-  timevar = "tree_id",
-  times = names(exampledata)[-which(names(exampledata) == "year")],
-  direction = "long"
-)
+  # check arguments
+  if (!inherits(series, "data.frame")) {
+    stop("series must be a data.frame")
+  }
 
-# arrange by tree_id
-exampledata_l <- exampledata_l[order(exampledata_l$tree_id), ]
+  series$temp <- row.names(series)
 
-# clean
-rownames(exampledata_l) <- NULL
+  # long format
+  series_l <- reshape(
+    series,
+    varying = names(series)[-which(names(series) == "temp")],
+    v.names = "performance",
+    timevar = "ID",
+    times = names(series)[-which(names(series) == "temp")],
+    direction = "long"
+  )
 
-exampledata_l$id <- NULL
+  # arrange by ID
+  series_l <- series_l[order(series_l$ID), ]
 
-# test
-tree_test <- subset(exampledata_l, tree_id == "A-R-10a")
+  # clean
+  rownames(series_l) <- NULL
 
-identical(as.vector(tree_test[, "ring_width"]),
-          as.vector(exampledata[, "A-R-10a"]))
+  series_l$id <- NULL
+
+  col_order <- c("ID" ,"temp", "performance")
+
+  series_l_o <- series_l[, col_order]
+
+  series_l_o$temp <- as.character(series_l_o$temp)
+
+  return(series_l)
+
+}
+
+# kk <- tucson_2_resilience(series = exampledata)
+# resindex(
+#   series = kk,
+#   event = list("1990", "2000:2002"),
+#   lag = c(4, 3),
+#   index =  c("resilience", "recovery", "resistance")
+# )
+
